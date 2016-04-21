@@ -27,6 +27,10 @@ private let defaultAlphaValueOpaque: CGFloat = 1.0
 private let defaultAlphaValueTransparent: CGFloat = 0.0
 private let defaultAlphaValueSemiTransparent: CGFloat = 0.7
 
+// Default discard Threshold
+private let defaultDiscardThreshold: CGFloat = 0.8
+
+
 public protocol KolodaViewDataSource:class {
     
     func kolodaNumberOfCards(koloda: KolodaView) -> UInt
@@ -53,6 +57,10 @@ public protocol KolodaViewDelegate:class {
     func kolodaDidResetCard(koloda: KolodaView)
     func kolodaSwipeThresholdMargin(koloda: KolodaView) -> CGFloat?
     func koloda(koloda: KolodaView, didShowCardAtIndex index: UInt)
+    func koloda(koloda: KolodaView, draggedCardTopToBottom finishPercent: CGFloat, card: DraggableCardView)
+    func koloda(koloda: KolodaView, discarded card: DraggableCardView)
+    func kolodaIsDiscardable(koloda: KolodaView, discarded card: DraggableCardView) -> Bool
+    
 }
 
 public extension KolodaViewDelegate {
@@ -67,6 +75,9 @@ public extension KolodaViewDelegate {
     func kolodaDidResetCard(koloda: KolodaView) {}
     func kolodaSwipeThresholdMargin(koloda: KolodaView) -> CGFloat? { return nil}
     func koloda(koloda: KolodaView, didShowCardAtIndex index: UInt) {}
+    func koloda(koloda: KolodaView, draggedCardTopToBottom finishPercent: CGFloat, card: DraggableCardView) {}
+    func koloda(koloda: KolodaView, discarded card: DraggableCardView) {}
+    func kolodaIsDiscardable(koloda: KolodaView, discarded card: DraggableCardView) -> Bool {return false}
     
 }
 
@@ -85,11 +96,14 @@ public class KolodaView: UIView, DraggableCardDelegate {
     
     public var countOfVisibleCards = defaultCountOfVisibleCards
     private var visibleCards = [DraggableCardView]()
+    internal var discardNotified = false
+    internal var addCardAnimating = false
     internal var animating = false
     
     public var alphaValueOpaque: CGFloat = defaultAlphaValueOpaque
     public var alphaValueTransparent: CGFloat = defaultAlphaValueTransparent
     public var alphaValueSemiTransparent: CGFloat = defaultAlphaValueSemiTransparent
+    public var bottomDiscardThreshold: CGFloat = defaultDiscardThreshold
     
     public lazy var animator: KolodaViewAnimator = {
        return KolodaViewAnimator(koloda: self)
@@ -249,6 +263,24 @@ public class KolodaView: UIView, DraggableCardDelegate {
             self.moveOtherCardsWithPercentage(percentage)
         }
         delegate?.koloda(self, draggedCardWithPercentage: percentage, inDirection: direction)
+        
+        // Check our transform
+        let t = card.transform
+        let halfHeight: CGFloat = card.bounds.size.height/2
+        
+        if t.ty > halfHeight {
+            
+            let finishPercent =  (t.ty - halfHeight) / halfHeight
+            delegate?.koloda(self, draggedCardTopToBottom: finishPercent, card: card)
+            
+            if finishPercent > bottomDiscardThreshold && discardNotified == false && delegate?.kolodaIsDiscardable(self, discarded: card) == true {
+                discardNotified = true
+                card.hidden = true
+                delegate?.koloda(self, discarded:  card)
+            }
+            
+        }
+
     }
     
     func card(card: DraggableCardView, wasSwipedInDirection direction: SwipeResultDirection) {
@@ -277,6 +309,8 @@ public class KolodaView: UIView, DraggableCardDelegate {
         }
         
         delegate?.kolodaDidResetCard(self)
+        delegate?.koloda(self, draggedCardTopToBottom: 0, card: card)
+        discardNotified = false
     }
     
     func card(cardWasTapped card: DraggableCardView) {
@@ -286,6 +320,7 @@ public class KolodaView: UIView, DraggableCardDelegate {
     }
     
     func card(cardSwipeThresholdMargin card: DraggableCardView) -> CGFloat? {
+        delegate?.koloda(self, draggedCardTopToBottom: 0, card: card)
         return delegate?.kolodaSwipeThresholdMargin(self)
     }
     
