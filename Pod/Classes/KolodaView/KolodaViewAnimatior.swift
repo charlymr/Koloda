@@ -121,3 +121,44 @@ public class KolodaViewAnimator {
     }
     
 }
+
+
+extension KolodaViewAnimator {
+    
+    public func applyDropRemovalAnimation(cards: [DraggableCardView], completion: AnimationCompletionBlock = nil) {
+        
+        UIView.animateWithDuration(0.3, animations: {
+            
+            self.koloda?.transform = CGAffineTransformMakeTranslation(0, self.koloda!.bounds.size.height)
+            
+            }, completion: { (_) in
+                completion?(true)
+                
+                UIView.animateWithDuration(0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.7, options: .CurveEaseInOut, animations: {
+
+                    cards.forEach { $0.alpha = 0.0 }
+                    cards.forEach { $0.transform = CGAffineTransformMakeTranslation(0, $0.bounds.size.height) }
+                    self.koloda?.transform = CGAffineTransformIdentity
+
+                    }, completion: nil)
+        })
+
+    }
+    
+    public func applyJumpInsertionAnimation(cards: [DraggableCardView], completion: AnimationCompletionBlock = nil) {
+        
+        cards.forEach { $0.transform = CGAffineTransformMakeTranslation(0, $0.bounds.size.height*2) }
+
+        UIView.animateWithDuration(0.8, delay: 0, usingSpringWithDamping: 0.4, initialSpringVelocity: 0.8, options: .CurveEaseInOut, animations: {
+            cards.forEach { $0.transform = CGAffineTransformIdentity }
+            
+            }, completion: { (finished) in
+                cards.forEach { $0.removeFromSuperview()
+                    completion?(true)
+
+            }
+
+        })
+    }
+    
+}
