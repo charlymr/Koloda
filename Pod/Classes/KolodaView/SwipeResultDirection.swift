@@ -73,7 +73,7 @@ private struct Direction {
     }
     
     var bearing: Double {
-        return self.point.bearingTo(Direction.None.point)
+        return self.point.bearingTo(point: Direction.None.point)
     }
     
     static let None = Direction(horizontalPosition: .Middle, verticalPosition: .Middle)
@@ -101,11 +101,11 @@ extension CGPoint {
     }
     
     func scalarProjectionWith(point: CGPoint) -> CGFloat {
-        return dotProductWith(point) / point.modulo
+        return dotProductWith(point: point) / point.modulo
     }
     
     func scalarProjectionPointWith(point: CGPoint) -> CGPoint {
-        let r = scalarProjectionWith(point) / point.modulo
+        let r = scalarProjectionWith(point: point) / point.modulo
         return CGPoint(x: point.x * r, y: point.y * r)
     }
     
@@ -119,7 +119,7 @@ extension CGPoint {
     
     func distanceToRect(rect: CGRect) -> CGFloat {
         if rect.contains(self) {
-            return distanceTo(CGPoint(x: rect.midX, y: rect.midY))
+            return distanceTo(point: CGPoint(x: rect.midX, y: rect.midY))
         }
         let dx = max(rect.minX - self.x, self.x - rect.maxX, 0)
         let dy = max(rect.minY - self.y, self.y - rect.maxY, 0)

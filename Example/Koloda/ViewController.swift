@@ -31,17 +31,17 @@ class ViewController: UIViewController {
         kolodaView.dataSource = self
         kolodaView.delegate = self
         
-        self.modalTransitionStyle = UIModalTransitionStyle.FlipHorizontal
+        self.modalTransitionStyle = UIModalTransitionStyle.flipHorizontal
     }
     
     
     //MARK: IBActions
     @IBAction func leftButtonTapped() {
-        kolodaView?.swipe(SwipeResultDirection.Left)
+        kolodaView?.swipe(direction: SwipeResultDirection.Left)
     }
     
     @IBAction func rightButtonTapped() {
-        kolodaView?.swipe(SwipeResultDirection.Right)
+        kolodaView?.swipe(direction: SwipeResultDirection.Right)
     }
     
     @IBAction func undoButtonTapped() {
@@ -53,13 +53,13 @@ class ViewController: UIViewController {
 extension ViewController: KolodaViewDelegate {
     
     func kolodaDidRunOutOfCards(koloda: KolodaView) {
-        dataSource.insert(UIImage(named: "Card_like_6")!, atIndex: kolodaView.currentCardIndex - 1)
+        dataSource.insert(UIImage(named: "Card_like_6")!, at: kolodaView.currentCardIndex - 1)
         let position = kolodaView.currentCardIndex
-        kolodaView.insertCardAtIndexRange(position...position, animated: true)
+        kolodaView.insertCardAtIndexRange(indexRange: [position], animated: true)
     }
     
     func koloda(koloda: KolodaView, didSelectCardAtIndex index: UInt) {
-        UIApplication.sharedApplication().openURL(NSURL(string: "http://yalantis.com/")!)
+        UIApplication.shared().openURL(NSURL(string: "http://yalantis.com/")! as URL)
     }
 }
 
@@ -75,7 +75,7 @@ extension ViewController: KolodaViewDataSource {
     }
     
     func koloda(koloda: KolodaView, viewForCardOverlayAtIndex index: UInt) -> OverlayView? {
-        return NSBundle.mainBundle().loadNibNamed("OverlayView",
+        return Bundle.mainBundle().loadNibNamed("OverlayView",
             owner: self, options: nil)[0] as? OverlayView
     }
 }

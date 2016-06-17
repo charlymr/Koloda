@@ -29,17 +29,17 @@ class BackgroundAnimationViewController: UIViewController {
         kolodaView.dataSource = self
         kolodaView.animator = BackgroundKolodaAnimator(koloda: kolodaView)
         
-        self.modalTransitionStyle = UIModalTransitionStyle.FlipHorizontal
+        self.modalTransitionStyle = UIModalTransitionStyle.flipHorizontal
     }
     
     
     //MARK: IBActions
     @IBAction func leftButtonTapped() {
-        kolodaView?.swipe(SwipeResultDirection.Left)
+        kolodaView?.swipe(direction: SwipeResultDirection.Left)
     }
     
     @IBAction func rightButtonTapped() {
-        kolodaView?.swipe(SwipeResultDirection.Right)
+        kolodaView?.swipe(direction: SwipeResultDirection.Right)
     }
     
     @IBAction func undoButtonTapped() {
@@ -55,7 +55,7 @@ extension BackgroundAnimationViewController: KolodaViewDelegate {
     }
     
     func koloda(koloda: KolodaView, didSelectCardAtIndex index: UInt) {
-        UIApplication.sharedApplication().openURL(NSURL(string: "http://yalantis.com/")!)
+        UIApplication.shared().openURL(NSURL(string: "http://yalantis.com/")! as URL)
     }
     
     func kolodaShouldApplyAppearAnimation(koloda: KolodaView) -> Bool {
@@ -72,8 +72,8 @@ extension BackgroundAnimationViewController: KolodaViewDelegate {
     
     func koloda(kolodaBackgroundCardAnimation koloda: KolodaView) -> POPPropertyAnimation? {
         let animation = POPSpringAnimation(propertyNamed: kPOPViewFrame)
-        animation.springBounciness = frameAnimationSpringBounciness
-        animation.springSpeed = frameAnimationSpringSpeed
+        animation?.springBounciness = frameAnimationSpringBounciness
+        animation?.springSpeed = frameAnimationSpringSpeed
         return animation
     }
 }
@@ -90,7 +90,7 @@ extension BackgroundAnimationViewController: KolodaViewDataSource {
     }
     
     func koloda(koloda: KolodaView, viewForCardOverlayAtIndex index: UInt) -> OverlayView? {
-        return NSBundle.mainBundle().loadNibNamed("CustomOverlayView",
+        return Bundle.main().loadNibNamed("CustomOverlayView",
             owner: self, options: nil)[0] as? OverlayView
     }
 }
